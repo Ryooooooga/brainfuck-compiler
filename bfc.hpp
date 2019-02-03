@@ -160,6 +160,9 @@ namespace bfc
 
         void emit_read()
         {
+            stream_ <<
+                "    call _getchar\n"
+                "    mov [rbx], al\n";
         }
 
         void emit_comment([[maybe_unused]] char c)
