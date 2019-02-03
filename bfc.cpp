@@ -1,7 +1,5 @@
 #include "bfc.hpp"
 
-#include <iostream>
-
 int main()
 {
     constexpr auto src =
