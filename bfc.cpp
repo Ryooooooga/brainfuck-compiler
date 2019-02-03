@@ -4,5 +4,9 @@
 
 int main()
 {
-    bfc::parse(R"(+++++++++[>++++++++>+++++++++++>+++++<<<-]>.>++.+++++++..+++.>-------------.<<+++++++++++++++.>.+++.------.--------.>+.)", bfc::assembler {std::cout});
+    constexpr auto src =
+#include "example/mandelbrot.bf"
+;
+
+    bfc::parse(src, bfc::jit_compiler {})();
 }
