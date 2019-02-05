@@ -83,6 +83,8 @@ namespace bfc
                 "    push rbp\n"
                 "    mov rbp, rsp\n"
 
+                "    push rbx\n"
+                "    push r12\n"
                 "    mov esi, 1\n"
                 "    mov edi, 0x10000\n"
                 "    call _calloc\n"
@@ -100,6 +102,8 @@ namespace bfc
             stream_ <<
                 "    mov rdi, r12\n"
                 "    call _free\n"
+                "    pop r12\n"
+                "    pop rbx\n"
 
                 "    mov rax, 0\n"
                 "    mov rsp, rbp\n"
@@ -243,6 +247,10 @@ namespace bfc
             code_.insert(std::end(code_), {
                 0x55,                                                       // push rbp
                 0x48, 0x89, 0xe5,                                           // mov rbp, rsp
+                0x53,                                                       // rbx
+                0x41, 0x54,                                                 // push r12
+                0x41, 0x55,                                                 // push r13
+                0x41, 0x56,                                                 // push r14
                 0xbe, 0x01, 0x00, 0x00, 0x00,                               // mov esi, 1
                 0xbf, 0x00, 0x00, 0x01, 0x00,                               // mov edi, 0x10000
                 0x48, 0xb8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // mov rax, calloc
@@ -257,32 +265,32 @@ namespace bfc
             const auto putchar_ptr = reinterpret_cast<std::uintptr_t>(putchar);
             const auto getchar_ptr = reinterpret_cast<std::uintptr_t>(getchar);
 
-            code_[0x10] = calloc_ptr >>  0;
-            code_[0x11] = calloc_ptr >>  8;
-            code_[0x12] = calloc_ptr >> 16;
-            code_[0x13] = calloc_ptr >> 24;
-            code_[0x14] = calloc_ptr >> 32;
-            code_[0x15] = calloc_ptr >> 40;
-            code_[0x16] = calloc_ptr >> 48;
-            code_[0x17] = calloc_ptr >> 56;
+            code_[0x17] = calloc_ptr >>  0;
+            code_[0x18] = calloc_ptr >>  8;
+            code_[0x19] = calloc_ptr >> 16;
+            code_[0x1a] = calloc_ptr >> 24;
+            code_[0x1b] = calloc_ptr >> 32;
+            code_[0x1c] = calloc_ptr >> 40;
+            code_[0x1d] = calloc_ptr >> 48;
+            code_[0x1e] = calloc_ptr >> 56;
 
-            code_[0x22] = putchar_ptr >>  0;
-            code_[0x23] = putchar_ptr >>  8;
-            code_[0x24] = putchar_ptr >> 16;
-            code_[0x25] = putchar_ptr >> 24;
-            code_[0x26] = putchar_ptr >> 32;
-            code_[0x27] = putchar_ptr >> 40;
-            code_[0x28] = putchar_ptr >> 48;
-            code_[0x29] = putchar_ptr >> 56;
+            code_[0x29] = putchar_ptr >>  0;
+            code_[0x2a] = putchar_ptr >>  8;
+            code_[0x2b] = putchar_ptr >> 16;
+            code_[0x2c] = putchar_ptr >> 24;
+            code_[0x2d] = putchar_ptr >> 32;
+            code_[0x2e] = putchar_ptr >> 40;
+            code_[0x2f] = putchar_ptr >> 48;
+            code_[0x30] = putchar_ptr >> 56;
 
-            code_[0x2c] = getchar_ptr >>  0;
-            code_[0x2d] = getchar_ptr >>  8;
-            code_[0x2e] = getchar_ptr >> 16;
-            code_[0x2f] = getchar_ptr >> 24;
-            code_[0x30] = getchar_ptr >> 32;
-            code_[0x31] = getchar_ptr >> 40;
-            code_[0x32] = getchar_ptr >> 48;
-            code_[0x33] = getchar_ptr >> 56;
+            code_[0x33] = getchar_ptr >>  0;
+            code_[0x34] = getchar_ptr >>  8;
+            code_[0x35] = getchar_ptr >> 16;
+            code_[0x36] = getchar_ptr >> 24;
+            code_[0x37] = getchar_ptr >> 32;
+            code_[0x38] = getchar_ptr >> 40;
+            code_[0x39] = getchar_ptr >> 48;
+            code_[0x3a] = getchar_ptr >> 56;
         }
 
         function finish()
@@ -296,6 +304,10 @@ namespace bfc
                 0x4c, 0x89, 0xe7,                                           // mov rdi, r12
                 0x48, 0xb8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // mov rax, free
                 0xff, 0xd0,                                                 // call rax
+                0x41, 0x5e,                                                 // pop r14
+                0x41, 0x5d,                                                 // pop r13
+                0x41, 0x5c,                                                 // pop r12
+                0x5b,                                                       // pop rbx
                 0x48, 0x89, 0xec,                                           // mov rsp, rbp
                 0x5d,                                                       // pop rbp
                 0xc3,                                                       // ret
@@ -303,14 +315,14 @@ namespace bfc
 
             const auto free_ptr = reinterpret_cast<std::uintptr_t>(free);
 
-            code_[code_.size() - 0x0f] = free_ptr >>  0;
-            code_[code_.size() - 0x0e] = free_ptr >>  8;
-            code_[code_.size() - 0x0d] = free_ptr >> 16;
-            code_[code_.size() - 0x0c] = free_ptr >> 24;
-            code_[code_.size() - 0x0b] = free_ptr >> 32;
-            code_[code_.size() - 0x0a] = free_ptr >> 40;
-            code_[code_.size() - 0x09] = free_ptr >> 48;
-            code_[code_.size() - 0x08] = free_ptr >> 56;
+            code_[code_.size() - 0x16] = free_ptr >>  0;
+            code_[code_.size() - 0x15] = free_ptr >>  8;
+            code_[code_.size() - 0x14] = free_ptr >> 16;
+            code_[code_.size() - 0x13] = free_ptr >> 24;
+            code_[code_.size() - 0x12] = free_ptr >> 32;
+            code_[code_.size() - 0x11] = free_ptr >> 40;
+            code_[code_.size() - 0x10] = free_ptr >> 48;
+            code_[code_.size() - 0x0f] = free_ptr >> 56;
 
             return function {code_.data(), code_.size()};
         }
