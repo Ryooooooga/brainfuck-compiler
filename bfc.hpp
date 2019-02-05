@@ -2,12 +2,21 @@
 #define INCLUDE_bfc_hpp
 
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <ostream>
 #include <string_view>
 #include <vector>
 
 #include <sys/mman.h>
+
+#if defined(__APPLE__)
+#   define BFC_ASM_FUNCTION_PREFIX "_"
+#elif defined(__linux__)
+#   define BFC_ASM_FUNCTION_PREFIX
+#else
+#   error unknown platform
+#endif
 
 namespace bfc
 {
@@ -78,8 +87,8 @@ namespace bfc
 
             stream_ <<
                 "    .intel_syntax noprefix\n"
-                "    .global _main\n"
-                "_main:\n"
+                "    .global " BFC_ASM_FUNCTION_PREFIX "main\n"
+                BFC_ASM_FUNCTION_PREFIX "main:\n"
                 "    push rbp\n"
                 "    mov rbp, rsp\n"
 
@@ -87,7 +96,7 @@ namespace bfc
                 "    push r12\n"
                 "    mov esi, 1\n"
                 "    mov edi, 0x10000\n"
-                "    call _calloc\n"
+                "    call " BFC_ASM_FUNCTION_PREFIX "calloc\n"
                 "    mov rbx, rax\n"
                 "    mov r12, rax\n";
         }
@@ -101,7 +110,7 @@ namespace bfc
 
             stream_ <<
                 "    mov rdi, r12\n"
-                "    call _free\n"
+                "    call " BFC_ASM_FUNCTION_PREFIX "free\n"
                 "    pop r12\n"
                 "    pop rbx\n"
 
@@ -170,13 +179,13 @@ namespace bfc
             stream_ <<
                 "    mov al, [rbx]\n"
                 "    movsx edi, al\n"
-                "    call _putchar\n";
+                "    call " BFC_ASM_FUNCTION_PREFIX "putchar\n";
         }
 
         void emit_read()
         {
             stream_ <<
-                "    call _getchar\n"
+                "    call " BFC_ASM_FUNCTION_PREFIX "getchar\n"
                 "    mov [rbx], al\n";
         }
 
@@ -202,7 +211,7 @@ namespace bfc
                 throw std::bad_alloc {};
             }
 
-            ::memcpy(data_, data, size_);
+            std::memcpy(data_, data, size_);
         }
 
         function(const function&) =delete;
@@ -330,14 +339,14 @@ namespace bfc
         void emit_backward()
         {
             code_.insert(std::end(code_), {
-                0x48, 0xff, 0xc3, // inc [rbx]
+                0x48, 0xff, 0xc3, // inc rbx
             });
         }
 
         void emit_forward()
         {
             code_.insert(std::end(code_), {
-                0x48, 0xff, 0xcb, // dec [rbx]
+                0x48, 0xff, 0xcb, // dec rbx
             });
         }
 
